@@ -1,7 +1,41 @@
 <%- include('partials/header') %>
 
-<div class="home">
-  <h1>quipleague</h1>
+<nav class="navbar">
+  <a class="navbar-brand" href="#">quipleague</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar mr-auto">
+      <li class="nav-item active"><a class="nav-link" href="/">Home</a></li>
+      <li class="nav-item"><a class="nav-link disabled" href="/" tabindex="-1" aria-disabled="true">Profile</a></li>
+
+    </ul>
+  </div>
+</nav>
+
+<div class="container">
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">ID</th>
+        <th scope="col">Name</th>
+        <th scope="col">Total Points</th>
+      </tr>
+    </thead>
+    <tbody>
+    <% leaderboard.forEach(function(player, index){%>
+        <tr>
+        <th scope="row"><%= index+1%></th>
+        <td><%=player.playerName%></td>
+        <td><%=player.playerAliases %></td>
+        <td><%=player.totalScore %></td>
+        </tr>
+        <%}) %>
+    </tbody>
+  </table>
 </div>
 
 <%- include('partials/footer') %>
