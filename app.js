@@ -153,6 +153,12 @@ app.route("/")
     });
   });
 
+app.route("/submit")
+  .get(function(req, resp){
+    resp.render("submit");
+  });
+
+
 let port = process.env.PORT;
 if (port == null || port == "") {
   port = 3000;
