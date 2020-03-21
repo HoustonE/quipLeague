@@ -14,8 +14,8 @@
     <% leaderboard.forEach(function(player, index){%>
         <tr>
         <th scope="row"><%= index+1%></th>
-        <td><%=player.playerName%></td>
-        <td><%=player.playerAliases %></td>  <!--Set width limit for when aliases get too large-->
+        <td><%=player._id%></td>
+        <td><%=player.aliases %></td>  <!--Set width limit for when aliases get too large-->
         <td><%=player.totalScore %></td>
         </tr>
         <%}) %>
