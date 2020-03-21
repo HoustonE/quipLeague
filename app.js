@@ -12,6 +12,7 @@ Quiplash Score tracker
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+const _ = require("lodash");
 
 const app = express();
 
@@ -95,7 +96,7 @@ const Player = new mongoose.model("Player", playerSchema);
 // });
 
 // ****** REST ******
-
+// -- Home
 app.route("/")
   .get(function(req, resp) {
     Player.aggregate([{$unwind: "$sessionScores"}, {$unwind: "$playerAliases"},
@@ -105,7 +106,7 @@ app.route("/")
       if (err) {
         console.log(err);
       } else {
-        console.log(results);
+        // console.log(results);
         resp.render("home", {leaderboard: results});
       }
     });
@@ -118,6 +119,32 @@ app.route("/")
     //   }
     // });
   });
+
+// -- Player
+app.route("/:playerName")
+  .get(function(req, resp){
+    const thisPlayerName = _.camelCase(req.params.playerName);
+    console.log(thisPlayerName.replace(/([a-z0-9])([A-Z])/g, '$1 $2'));
+
+    Player.findOne({playerName: { $regex: '^'+thisPlayerName.replace(/([a-z0-9])([A-Z])/g, '$1 $2')+'$', $options: "i"}},
+      function(err, foundPlayer){
+        if(err){
+          console.log(err);
+          // alert(err);
+        } else {
+          if(!foundPlayer){
+            console.log("player not found :(");
+            // alert("player not found :(");
+            resp.redirect("/");
+          } else {
+            resp.render("player", {playerName: thisPlayerName, thisPlayer: foundPlayer});
+          }
+        }
+      }
+    );
+  });
+
+
 
 app.route("/submit")
   .get(function(req, resp) {

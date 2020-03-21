@@ -1,0 +1,31 @@
+<%- include('partials/header') %>
+
+  <div class="container">
+      <h1><%=playerName%></h1>
+
+      <h2>Known Aliases: <%=thisPlayer.playerAliases %></h2>
+
+      <h3>Match History</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">GameType</th>
+            <th scope="col">Score</th>
+            <th scope="col">position</th>
+          </tr>
+        </thead>
+        <tbody>
+        <% thisPlayer.sessionScores.forEach(function(match){%>
+            <tr>
+            <th scope="row"><%= match.sessionId%></th>
+            <td><%=match.gameType%></td>
+            <td><%=match.score %></td>  <!--Set width limit for when aliases get too large-->
+            <td><%=match.position %></td>
+            </tr>
+            <%}) %>
+        </tbody>
+      </table>
+  </div>
+
+<%- include('partials/footer') %>
