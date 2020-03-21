@@ -21,6 +21,7 @@
     "express": "^4.17.1",
     "lodash": "^4.17.15",
     "mongoose": "^5.9.5",
+    "ordinal": "^1.0.3",
     "passport": "^0.4.1"
   }
 }

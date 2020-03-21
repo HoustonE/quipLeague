@@ -1,0 +1,11 @@
+
+.form-inline {
+    display: -ms-flexbox;
+    display: inline;
+    -ms-flex-flow: row wrap;
+    flex-flow: row wrap;
+    -ms-flex-align: center;
+    align-items: center;
+    margin-right: 4px;
+    z-index: -999;
+}

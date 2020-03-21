@@ -4,7 +4,7 @@
       <h1><%=playerName%></h1>
 
       <h2>Known Aliases: <%=thisPlayer.playerAliases %></h2>
-
+      <br>
       <h3>Match History</h3>
       <table class="table">
         <thead>
@@ -12,7 +12,7 @@
             <th scope="col">#</th>
             <th scope="col">GameType</th>
             <th scope="col">Score</th>
-            <th scope="col">position</th>
+            <th scope="col">Position</th>
           </tr>
         </thead>
         <tbody>
@@ -21,11 +21,39 @@
             <th scope="row"><%= match.sessionId%></th>
             <td><%=match.gameType%></td>
             <td><%=match.score %></td>  <!--Set width limit for when aliases get too large-->
-            <td><%=match.position %></td>
+            <td><%=match.position%></td>
             </tr>
             <%}) %>
         </tbody>
       </table>
+
+
   </div>
+
+  <div class="container fixed-bottom" id="submit-area">
+    <form class="form-inline" action="/:playerName" method="post">
+      <div class="form-row">
+        <div class="col-md-3 mb-3 form-group" id="entry-item">
+          <label for="match" class=".col-form-label-sm">Match #: </label>
+          <input class="form-control-sm" type="number" name="matchID" value="matchID">
+        </div>
+        <div class="col-md-3 mb-3 form-group" id="entry-item">
+          <label for="gameType" class=".col-form-label-sm">Game Type: </label>
+          <select class="form-control form-control-sm">
+          <option value="Quiplash">Quiplash</option>
+          </select>
+        </div>
+
+        <div class="col-md-3 mb-3 form-group" id="entry-item">
+          <label for="score" class=".col-form-label-sm">Score: </label>
+          <input class="form-control-sm" type="number" name="score" value="score">
+        </div>
+        <div class="col-md-3 mb-4 form-group" id="entry-item">
+          <button class="btn btn-primary btn-sm" type="submit">Enter Match</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
 
 <%- include('partials/footer') %>

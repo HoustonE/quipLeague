@@ -13,6 +13,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const _ = require("lodash");
+const ordinal = require('ordinal');
 
 const app = express();
 
@@ -137,7 +138,7 @@ app.route("/:playerName")
             // alert("player not found :(");
             resp.redirect("/");
           } else {
-            resp.render("player", {playerName: thisPlayerName, thisPlayer: foundPlayer});
+            resp.render("player", {playerName: foundPlayer.playerName, thisPlayer: foundPlayer});
           }
         }
       }
