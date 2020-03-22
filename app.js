@@ -125,7 +125,7 @@ app.route("/")
 app.route("/:playerName")
   .get(function(req, resp){
     const thisPlayerName = _.camelCase(req.params.playerName);
-    console.log(thisPlayerName.replace(/([a-z0-9])([A-Z])/g, '$1 $2'));
+    // console.log(thisPlayerName.replace(/([a-z0-9])([A-Z])/g, '$1 $2'));
 
     Player.findOne({playerName: { $regex: '^'+thisPlayerName.replace(/([a-z0-9])([A-Z])/g, '$1 $2')+'$', $options: "i"}},
       function(err, foundPlayer){
@@ -143,14 +143,66 @@ app.route("/:playerName")
         }
       }
     );
+  })
+  .post(function(req, resp){
+    console.log(req.body.playerId);
+    const newSessionScore = new SessionScore(
+      {
+        sessionId: req.body.matchID,
+        gameType: req.body.gameType,
+        score: req.body.score
+      }
+    );
+
+    console.log(newSessionScore);
+
+    Player.findById(req.body.playerId, function(err, foundPlayer){
+      if(err){
+        console.log(err);
+        // alert(err);
+      } else {
+        if(!foundPlayer){
+          console.log("player not found :(");
+          // alert("player not found :(");
+          resp.redirect("/");
+        } else {
+          foundPlayer.sessionScores.push(newSessionScore);
+          foundPlayer.save();
+          resp.render("player", {playerName: foundPlayer.playerName, thisPlayer: foundPlayer});
+        }
+      }});
+
+  });
+
+app.route("/match/:matchNumber")
+  .get(function(req, resp){
+    const sessionNum = req.params.matchNumber;
+
+    console.log(sessionNum);
+
+    const pipeline = [{$unwind: "$sessionScores"},
+    {$project: {'matchNum': '$sessionScores.sessionId', 'playerName': '$playerName', 'gameType': '$sessionScores.gameType', 'score': '$sessionScores.score'}},
+    {$match: {matchNum: Number(sessionNum)}},
+    {$sort: {score: -1}}];
+
+    Player.aggregate(pipeline, function(err, results){
+      console.log(results);
+      if(err){
+        console.log(err);
+        // alert(err);
+      } else {
+        if(!results){
+          console.log("player not found :(");
+          // alert("player not found :(");
+          resp.redirect("/");
+        } else {
+          resp.render("match", {thisMatch: results});
+        }
+      }
+    });
   });
 
 
-
-app.route("/submit")
-  .get(function(req, resp) {
-    resp.render("submit");
-  });
 
 
 let port = process.env.PORT;

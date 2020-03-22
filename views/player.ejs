@@ -3,9 +3,9 @@
   <div class="container">
       <h1><%=playerName%></h1>
 
-      <h2>Known Aliases: <%=thisPlayer.playerAliases %></h2>
+      <h3>Known Aliases: <%=thisPlayer.playerAliases %></h3>
       <br>
-      <h3>Match History</h3>
+      <h5>Match History</h5>
       <table class="table">
         <thead>
           <tr>
@@ -18,7 +18,7 @@
         <tbody>
         <% thisPlayer.sessionScores.forEach(function(match){%>
             <tr>
-            <th scope="row"><%= match.sessionId%></th>
+            <th scope="row"><a href="/match/<%= match.sessionId%>"><%= match.sessionId%></a></th>
             <td><%=match.gameType%></td>
             <td><%=match.score %></td>  <!--Set width limit for when aliases get too large-->
             <td><%=match.position%></td>
@@ -32,6 +32,7 @@
 
   <div class="container fixed-bottom" id="submit-area">
     <form class="form-inline" action="/:playerName" method="post">
+      <input type="hidden" id="playerId" name="playerId" value="<%=thisPlayer._id%>">
       <div class="form-row">
         <div class="col-md-3 mb-3 form-group" id="entry-item">
           <label for="match" class=".col-form-label-sm">Match #: </label>
@@ -39,7 +40,7 @@
         </div>
         <div class="col-md-3 mb-3 form-group" id="entry-item">
           <label for="gameType" class=".col-form-label-sm">Game Type: </label>
-          <select class="form-control form-control-sm">
+          <select name="gameType" class="form-control form-control-sm">
           <option value="Quiplash">Quiplash</option>
           </select>
         </div>

@@ -1,0 +1,28 @@
+<%- include('partials/header') %>
+
+<div class="container">
+  <h1>Match : <%=thisMatch[0].matchNum %></h1>
+  <h3>Game Type: <%=thisMatch[0].gameType %></h3>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">Player</th>
+        <th scope="col">Score</th>
+        <th scope="col">Position</th>
+      </tr>
+    </thead>
+    <tbody>
+    <% thisMatch.forEach(function(player, index){%>
+        <tr>
+        <td><%=player.playerName%></td>
+        <td><%=player.score %></td>  <!--Set width limit for when aliases get too large-->
+        <td scope="row"><%= index+1%></td>
+        </tr>
+        <%}) %>
+    </tbody>
+  </table>
+
+</div>
+
+<%- include('partials/footer') %>
