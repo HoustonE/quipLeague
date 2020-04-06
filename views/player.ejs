@@ -4,12 +4,14 @@
       <h1><%=playerName%></h1>
 
       <h3>Known Aliases: <%=thisPlayer.playerAliases %></h3>
+      <h3>Email: <%=thisPlayer.playerEmail%></h3>
       <br>
       <h5>Match History</h5>
       <table class="table">
         <thead>
           <tr>
             <th scope="col">#</th>
+            <th scope="col">Date</th>
             <th scope="col">GameType</th>
             <th scope="col">Score</th>
             <th scope="col">Position</th>
@@ -19,6 +21,8 @@
         <% thisPlayer.sessionScores.forEach(function(match){%>
             <tr>
             <th scope="row"><a href="/match/<%= match.sessionId%>"><%= match.sessionId%></a></th>
+            <% var tempDate = new Date(match.sessionDate);%>
+            <td><%=tempDate.toDateString() %></td>
             <td><%=match.gameType%></td>
             <td><%=match.score %></td>  <!--Set width limit for when aliases get too large-->
             <td><%=match.position%></td>
@@ -36,7 +40,11 @@
       <div class="form-row">
         <div class="col-md-3 mb-3 form-group" id="entry-item">
           <label for="match" class=".col-form-label-sm">Match #: </label>
-          <input class="form-control-sm" type="number" name="matchID" value="matchID">
+          <input class="form-control-sm" type="number" name="matchID" value="">
+        </div>
+        <div class="col-md-3 mb-3 form-group" id="entry-item">
+          <label for="match" class=".col-form-label-sm">Date: </label>
+          <input class="form-control-sm" type="date" name="matchDate" value="">
         </div>
         <div class="col-md-3 mb-3 form-group" id="entry-item">
           <label for="gameType" class=".col-form-label-sm">Game Type: </label>
@@ -47,9 +55,12 @@
 
         <div class="col-md-3 mb-3 form-group" id="entry-item">
           <label for="score" class=".col-form-label-sm">Score: </label>
-          <input class="form-control-sm" type="number" name="score" value="score">
+          <input class="form-control-sm" type="number" name="score" value="">
         </div>
-        <div class="col-md-3 mb-4 form-group" id="entry-item">
+
+      </div>
+      <div class="form-row justify-content-end">
+        <div class="col-md-3 mb-3 form-group " id="entry-item">
           <button class="btn btn-primary btn-sm" type="submit">Enter Match</button>
         </div>
       </div>

@@ -1,0 +1,31 @@
+<%- include('partials/header') %>
+
+<div class="container" id="submit-area">
+  <form class="form-inline" action="/new-player/submit" method="post">
+    <div class="form-row">
+
+      <div class="col-md-3 mb-3 form-group" id="entry-item">
+        <label for="newName" class=".col-form-label-sm">Player Name: </label>
+        <input class="form-control-sm" type="text" name="newName" value="">
+      </div>
+
+      <div class="col-md-3 mb-3 form-group" id="entry-item">
+        <label for="newAlias" class=".col-form-label-sm">Alias</label>
+        <input class="form-control-sm" type="text" name="newAlias" value="">
+      </div>
+
+      <div class="col-md-3 mb-3 form-group" id="entry-item">
+        <label for="newEmail" class=".col-form-label-sm">Email: </label>
+        <input class="form-control-sm" type="email" name="newEmail" value="">
+      </div>
+
+      <div class="col-md-3 mb-4 form-group" id="entry-item">
+        <button class="btn btn-primary btn-sm" type="submit">Submit Player</button>
+      </div>
+
+    </div>
+  </form>
+</div>
+
+
+<%- include('partials/footer') %>

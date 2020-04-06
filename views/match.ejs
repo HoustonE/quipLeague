@@ -1,8 +1,14 @@
 <%- include('partials/header') %>
 
+
+
 <div class="container">
+
+
   <h1>Match : <%=thisMatch[0].matchNum %></h1>
   <h3>Game Type: <%=thisMatch[0].gameType %></h3>
+  <% var tempDate = new Date(thisMatch[0].sessionDate);%>
+  <h3>Date: <%=tempDate.toDateString()%></h3>
 
   <table class="table">
     <thead>

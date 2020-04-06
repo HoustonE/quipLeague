@@ -14,6 +14,7 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const _ = require("lodash");
 const ordinal = require('ordinal');
+const moment = require('moment');
 
 const app = express();
 
@@ -36,6 +37,7 @@ mongoose.connect('mongodb://localhost:27017/quipDB', {
 const sessionScoreSchema = new mongoose.Schema({
   //_id: mongoose.Schema.Types.ObjectId,
   sessionId: Number,
+  sessionDate: Date,
   //playerId: playerSchema,
   gameType: String,
   score: Number,
@@ -49,6 +51,7 @@ const playerSchema = new mongoose.Schema({
   //_id: mongoose.Schema.Types.ObjectId,
   playerName: String,
   playerAliases: [String],
+  playerEmail: String,
   sessionScores: [sessionScoreSchema]
 });
 
@@ -145,10 +148,11 @@ app.route("/:playerName")
     );
   })
   .post(function(req, resp){
-    console.log(req.body.playerId);
+
     const newSessionScore = new SessionScore(
       {
         sessionId: req.body.matchID,
+        sessionDate: req.body.matchDate,
         gameType: req.body.gameType,
         score: req.body.score
       }
@@ -167,7 +171,7 @@ app.route("/:playerName")
           resp.redirect("/");
         } else {
           foundPlayer.sessionScores.push(newSessionScore);
-          foundPlayer.save();
+          // foundPlayer.save();
           resp.render("player", {playerName: foundPlayer.playerName, thisPlayer: foundPlayer});
         }
       }});
@@ -178,15 +182,13 @@ app.route("/match/:matchNumber")
   .get(function(req, resp){
     const sessionNum = req.params.matchNumber;
 
-    console.log(sessionNum);
-
     const pipeline = [{$unwind: "$sessionScores"},
-    {$project: {'matchNum': '$sessionScores.sessionId', 'playerName': '$playerName', 'gameType': '$sessionScores.gameType', 'score': '$sessionScores.score'}},
+    {$project: {'matchNum': '$sessionScores.sessionId', 'sessionDate' : '$sessionScores.sessionDate', 'playerName': '$playerName', 'gameType': '$sessionScores.gameType', 'score': '$sessionScores.score'}},
     {$match: {matchNum: Number(sessionNum)}},
     {$sort: {score: -1}}];
 
     Player.aggregate(pipeline, function(err, results){
-      console.log(results);
+
       if(err){
         console.log(err);
         // alert(err);
@@ -202,7 +204,41 @@ app.route("/match/:matchNumber")
     });
   });
 
+app.route("/new-player/submit")
+  .get(function (req, resp){
+    resp.render("new-player");
+  })
+  .post(function (req, resp){
+    console.log(req.body.newName);
+    console.log(req.body.newAlias);
+    console.log(req.body.newEmail);
+    const newPlayerName = req.body.newName;
+    const newPlayerAlias = req.body.newAlias;
+    const newPlayerEmail = req.body.newEmail;
+    const newPlayer = new Player(
+      {
+        playerName: newPlayerName,
+        playerEmail: newPlayerEmail
+      });
+      console.log(newPlayer);
 
+    Player.findOne({playerName: newPlayerName}, function(err, player){
+      if(err){
+        console.log(err);
+      }else{
+        if(player){
+          console.log("That player already exists");
+          resp.redirect("/");
+        } else{
+            console.log(newPlayer);
+            newPlayer.playerAliases.push(newPlayerAlias);
+            newPlayer.save();
+            resp.render("player", {playerName: newPlayer.playerName, thisPlayer: newPlayer});
+        }
+      }
+    });
+
+  });
 
 
 let port = process.env.PORT;
