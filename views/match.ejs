@@ -7,7 +7,7 @@
 
   <h1>Match : <%=thisMatch[0].matchNum %></h1>
   <h3>Game Type: <%=thisMatch[0].gameType %></h3>
-  <% var tempDate = new Date(thisMatch[0].sessionDate);%>
+  <% var tempDate = new Date(thisMatch[0].sessionDate); var userTimezoneOffset = tempDate.getTimezoneOffset() * 60000; tempDate = new Date(tempDate.getTime() + userTimezoneOffset);%>
   <h3>Date: <%=tempDate.toDateString()%></h3>
 
   <table class="table">

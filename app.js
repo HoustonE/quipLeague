@@ -103,7 +103,7 @@ const Player = new mongoose.model("Player", playerSchema);
 // -- Home
 app.route("/")
   .get(function(req, resp) {
-    Player.aggregate([{$unwind: "$sessionScores"}, {$unwind: "$playerAliases"},
+    Player.aggregate([{$unwind: "$sessionScores"},
       {$group: {_id: "$playerName", aliases: {$addToSet: "$playerAliases"}, totalScore: {$sum: "$sessionScores.score"}}},
       {$sort: {totalScore: -1}}],
       function(err, results) {
@@ -114,14 +114,6 @@ app.route("/")
         resp.render("home", {leaderboard: results});
       }
     });
-
-    // Player.find({}).sort({totalScore: 'desc'}).exec(function(err, foundUsers){
-    //   if(err){
-    //     console.log(err);
-    //   } else {
-    //     resp.render("home", {leaderboard: foundUsers});
-    //   }
-    // });
   });
 
 // -- Player
@@ -170,8 +162,14 @@ app.route("/:playerName")
           // alert("player not found :(");
           resp.redirect("/");
         } else {
+          const newAlias = req.body.alias;
+          console.log(newAlias);
+          if (foundPlayer.playerAliases.includes(newAlias) === false && newAlias !== "" ) {
+             foundPlayer.playerAliases.push(newAlias);
+          }
+
           foundPlayer.sessionScores.push(newSessionScore);
-          // foundPlayer.save();
+          foundPlayer.save();
           resp.render("player", {playerName: foundPlayer.playerName, thisPlayer: foundPlayer});
         }
       }});
