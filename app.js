@@ -5,7 +5,7 @@ Quiplash Score tracker
 **/
 
 //jshint esversion:6
-
+require('dotenv').config();
 
 // ****** NPM Requirements ******
 
@@ -13,26 +13,90 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const _ = require("lodash");
-const ordinal = require('ordinal');
-const moment = require('moment');
+// const ordinal = require('ordinal');
+// const moment = require('moment');
+const dotenv = require('dotenv');
+const session = require('express-session');
+const passport = require('passport');
+const passportLocalMongoose = require('passport-local-mongoose');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const findOrCreate = require('mongoose-findorcreate');
 
 const app = express();
 
+app.use(express.static("public"));
 app.set("view engine", "ejs");
 
 app.use(bodyParser.urlencoded({
   extended: true
 }));
 
-app.use(express.static("public"));
+// ****** Session ******
+
+app.use(session({
+  secret: "POIUuyhiBKJBoihjOUGouyFOPUIYfHJgjHObnNVbcRDresEcvCZXzwERWp",
+  resave: false,
+  saveUninitialized: false
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
 
 // ****** Mongoose ******
+
 mongoose.connect('mongodb://localhost:27017/quipDB', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useFindAndModify: false
 });
+mongoose.set("useCreateIndex", true);
 
+// ****** UserSchema ******
+
+const userSchema = new mongoose.Schema({
+    email: String,
+    password: String,
+    googleId: String,
+    name: String
+});
+
+userSchema.plugin(passportLocalMongoose);
+userSchema.plugin(findOrCreate);
+
+const User = new mongoose.model("User", userSchema);
+
+// ****** Passport ******
+
+passport.use(User.createStrategy());
+
+passport.serializeUser(function(user, done) {
+  done(null, user.id);
+});
+
+passport.deserializeUser(function(id, done) {
+  User.findById(id, function(err, user) {
+    done(err, user);
+  });
+});
+
+// ****** GoogleAuth2.0 ******
+
+passport.use(new GoogleStrategy({
+    clientID: process.env.CLIENT_ID,
+    clientSecret: process.env.CLIENT_SECRET,
+    callbackURL: "http://localhost:3000/auth/google/quipleague",
+    userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo"
+  },
+  function(accessToken, refreshToken, profile, cb) {
+    User.findOrCreate({googleId: profile.id, name: profile.displayName , email: profile.emails[0].value}, function(err, user) {
+      return cb(err, user);
+    });
+  }
+));
+
+
+// ****** League Schema ******
 
 const sessionScoreSchema = new mongoose.Schema({
   //_id: mongoose.Schema.Types.ObjectId,
@@ -57,48 +121,6 @@ const playerSchema = new mongoose.Schema({
 
 const Player = new mongoose.model("Player", playerSchema);
 
-// // test player
-// const testPlayer = new Player({
-//   playerName: "Real Dingus",
-//   playerAliases: "evenanotherDingus",
-//   sessionScores: []
-// });
-//
-// console.log(testPlayer);
-//
-// //Test SessionSore
-// const newSessionScore = new SessionScore({
-//   sessionId: 2,
-//   //playerId: playerSchema,
-//   gameType: "Quiplash",
-//   score: 3111,
-//   position: 2
-// });
-//
-// console.log(newSessionScore);
-// // newSessionScore.save();
-//
-// Player.findOne({playerName: testPlayer.playerName}, function(err, foundPlayer) {
-//   if (err) {
-//     console.log(err);
-//   } else {
-//     if (!foundPlayer) {
-//       testPlayer.sessionScores.push(newSessionScore);
-//       testPlayer.save();
-//     } else {
-//       console.log("player found: " + foundPlayer);
-//       const newAlias = testPlayer.playerAliases[0];
-//       console.log(newAlias);
-//       if (foundPlayer.playerAliases.includes(newAlias) === false) {
-//         foundPlayer.playerAliases.push(newAlias);
-//         foundPlayer.save();
-//       }
-//       foundPlayer.sessionScores.push(newSessionScore);
-//       foundPlayer.save();
-//     }
-//   }
-// });
-
 // ****** REST ******
 // -- Home
 app.route("/")
@@ -116,11 +138,66 @@ app.route("/")
     });
   });
 
+// -- Login
+app.route("/login")
+  .get(function(req, resp) {
+    resp.render("login");
+  })
+  .post(function(req, resp) {
+    const user = new User({
+      username: req.body.username,
+      password: req.body.password
+    });
+
+    req.login(user, function(err) {
+      if (err) {
+        console.log(err);
+      } else {
+        passport.authenticate("local")(req, resp, function() {
+          resp.redirect("/");
+        });
+      }
+    });
+  });
+
+// -- Register
+app.route("/register")
+  .get(function(req, resp) {
+    resp.render("register");
+  })
+  .post(function(req, resp) {
+    User.register({username: req.body.username}, req.body.password, function(err, user) {
+      if (err) {
+        console.log(err);
+        resp.redirect("/register");
+      } else {
+        passport.authenticate("local")(req, resp, function() {
+          resp.redirect("/");
+        });
+      }
+    });
+  });
+
+// -- GoogleAuth
+app.route("/auth/google")
+  .get(
+    passport.authenticate("google", {
+      scope: ["profile", "email"]
+    })
+  );
+
+app.route("/auth/google/quipleague")
+  .get(passport.authenticate('google', {failureRedirect: '/login'}),function(req, resp) {
+      resp.redirect('/home');
+    }
+  );
+
+
 // -- Player
-app.route("/:playerName")
+app.route("/player/:playerName")
   .get(function(req, resp){
     const thisPlayerName = _.camelCase(req.params.playerName);
-    // console.log(thisPlayerName.replace(/([a-z0-9])([A-Z])/g, '$1 $2'));
+    console.log(thisPlayerName.replace(/([a-z0-9])([A-Z])/g, '$1 $2'));
 
     Player.findOne({playerName: { $regex: '^'+thisPlayerName.replace(/([a-z0-9])([A-Z])/g, '$1 $2')+'$', $options: "i"}},
       function(err, foundPlayer){

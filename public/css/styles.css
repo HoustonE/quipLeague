@@ -1,3 +1,6 @@
+#submit-area{
+    background-color: #fad06e;
+}
 
 .form-inline {
     display: -ms-flexbox;
@@ -8,4 +11,5 @@
     align-items: center;
     margin-right: 4px;
     z-index: -999;
+
 }
