@@ -192,6 +192,27 @@ app.route("/auth/google/quipleague")
     }
   );
 
+// -- Match list
+app.route("/match-list")
+  .get(function(req, resp){
+    const pipeline = [
+    {$unwind: "$sessionScores"},
+    {$group: {_id: '$sessionScores.sessionId', topScore: {$max: '$sessionScores.score'},players: {$push: {matchNum: '$sessionScores.sessionId', date: '$sessionScores.sessionDate', name: '$playerName', score: '$sessionScores.score'}}}},
+    {$project: {_id: 0, tops: {$setDifference: [{$map: {input: '$players', as: 'player', in: {'$cond': [{"$eq": ["$topScore", "$$player.score"]},"$$player",false]}}},[false]]}}},
+    {$unwind: '$tops'},
+    {$project: {matchNum: '$tops.matchNum', date: '$tops.date', name: '$tops.name', score: '$tops.score'}},
+    {$sort: {matchNum: 1}}
+    ];
+
+    Player.aggregate(pipeline, function(err, results){
+      if(err){
+        console.log(err);
+      } else {
+          resp.render("match-list", {matches: results});
+      }
+    });
+  });
+
 
 // -- Player
 app.route("/player/:playerName")

@@ -1,0 +1,27 @@
+<%- include('partials/header') %>
+
+<div class="container">
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Date</th>
+        <th scope="col">Winner</th>
+        <th scope="col">Top Score</th>
+      </tr>
+    </thead>
+    <tbody>
+    <% matches.forEach(function(match){%>
+        <tr>
+        <th scope="row"><%= match.matchNum%></th>
+        <% var tempDate = new Date(match.date); var userTimezoneOffset = tempDate.getTimezoneOffset() * 60000; tempDate = new Date(tempDate.getTime() + userTimezoneOffset);%>
+        <td><%=tempDate.toDateString() %></td>
+        <td><a href="player/:<%=match.name%>"><%=match.name%></a></td>
+        <td><%=match.score %></td>
+        </tr>
+        <%}) %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('partials/footer') %>
