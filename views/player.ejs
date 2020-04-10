@@ -34,8 +34,10 @@
 
   </div>
 
+  <% if(loggedIn){ %>
+
   <div class="container fixed-bottom" id="submit-area">
-    <form class="form-inline" action="/:playerName" method="post">
+    <form class="form-inline" action="/player/:playerName" method="post">
       <input type="hidden" id="playerId" name="playerId" value="<%=thisPlayer._id%>">
       <div class="form-row">
         <div class="col-md-4 mb-3 form-group" id="entry-item">
@@ -68,6 +70,6 @@
       </div>
     </form>
   </div>
-
+  <%}%>
 
 <%- include('partials/footer') %>

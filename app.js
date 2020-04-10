@@ -188,7 +188,7 @@ app.route("/auth/google")
 
 app.route("/auth/google/quipleague")
   .get(passport.authenticate('google', {failureRedirect: '/login'}),function(req, resp) {
-      resp.redirect('/home');
+      resp.redirect('/');
     }
   );
 
@@ -210,7 +210,7 @@ app.route("/player/:playerName")
             // alert("player not found :(");
             resp.redirect("/");
           } else {
-            resp.render("player", {playerName: foundPlayer.playerName, thisPlayer: foundPlayer});
+            resp.render("player", {playerName: foundPlayer.playerName, thisPlayer: foundPlayer, loggedIn: req.isAuthenticated()});
           }
         }
       }
@@ -253,6 +253,7 @@ app.route("/player/:playerName")
 
   });
 
+// -- Match
 app.route("/match/:matchNumber")
   .get(function(req, resp){
     const sessionNum = req.params.matchNumber;
@@ -279,9 +280,15 @@ app.route("/match/:matchNumber")
     });
   });
 
+
+ // -- New Player
 app.route("/new-player/submit")
   .get(function (req, resp){
-    resp.render("new-player");
+    if(req.isAuthenticated()){
+      resp.render("new-player");
+    } else{
+      resp.redirect("/login");
+    }
   })
   .post(function (req, resp){
     console.log(req.body.newName);
