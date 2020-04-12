@@ -1,0 +1,65 @@
+<%- include('partials/header') %>
+
+<div class="container entry-form" id="submit-area">
+  <form class="form-inline" action="/match-submit" method="post">
+    <div class="form-row">
+      <div class="col-md-3 mb-3 form-group" id="entry-item-match">
+        <label for="newMatch" class="col-form-label-sm">Match #: </label>
+        <input class="form-control" type="text" id="matchNum" name="newMatch" value="<%- lastMatch._id+1%>" required="true">
+        <span id="newMatchError" class="help-block"></span>
+      </div>
+      <div class="col-md-3 mb-3 form-group" id="entry-item">
+        <label for="newMatchDate" class="col-form-label-sm">Date: </label>
+        <input class="form-control" type="Date" name="newMatchDate" value="" required="true">
+      </div>
+      <div class="col-md-3 mb-3 form-group" id="entry-item">
+        <label for="gameType" class="col-form-label-sm">Game Type: </label>
+        <select name="gameType" class="form-control">
+        <option selected value="Quiplash">Quiplash</option>
+        </select>
+      </div>
+    </div>
+
+    <% for(var i = 0; i < 8;  i++ ){%>
+    <div class="form-row">
+
+      <div class="col-md-3 mb-3 form-group" id="entry-item">
+        <label for="newName" class=".col-form-label-sm">Player Name: </label>
+        <input class="form-control-sm" type="text" name="newPlayer[newName][]" value="">
+      </div>
+
+      <div class="col-md-3 mb-3 form-group" id="entry-item">
+        <label for="newAlias" class=".col-form-label-sm">Alias: </label>
+        <input class="form-control-sm" type="text" name="newPlayer[newAlias][]" value="">
+      </div>
+
+      <div class="col-md-3 mb-3 form-group" id="entry-item">
+        <label for="newScore" class=".col-form-label-sm">Score: </label>
+        <input class="form-control-sm" type="number" name="newPlayer[newScore][]" value="">
+      </div>
+
+    </div>
+    <% } %>
+
+    <div class="col-md-3 mb-4 form-group" id="entry-item">
+      <button class="btn btn-primary btn-sm" type="submit" onclick="return validationCheck();">Submit Match</button>
+    </div>
+
+  </form>
+</div>
+
+
+<%- include('partials/footer') %>
+
+<script type="text/javascript">
+  const passedId = <%-lastMatch._id %>
+  function validationCheck(){
+    const inputID = document.getElementById('matchNum').value;
+    if(inputID < passedId){
+      document.getElementById("newMatchError").innerHTML = "Invalid Match Number";
+      document.getElementById("entry-item-match").classList.add("has-error");
+      return false;
+    }
+  }
+
+</script>

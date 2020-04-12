@@ -301,6 +301,37 @@ app.route("/match/:matchNumber")
     });
   });
 
+app.route("/match-submit")
+  .get(function(req, resp){
+    // pass in top MatchID to validate that there is not one that exists
+    const pipeline = [{$unwind: "$sessionScores"},{$group: {_id: '$sessionScores.sessionId'}},{$sort: {_id: -1}},{$limit: 1}];
+
+    Player.aggregate(pipeline, function(err, results){
+      if(err){
+        console.log(err);
+      } else {
+        console.log(results[0]);
+        resp.render("match-submit", {lastMatch: results[0]});
+      }
+    });
+  })
+  .post(function(req, resp){
+    if(!req.body.newMatch){
+      resp.render("match-submit");
+    }
+
+    console.log(req.body.newMatch + " - " + req.body.newMatchDate);
+
+    const players = req.body.newPlayer;
+
+    for(var i = 0; i < 8;  i++){
+        console.log(players.newName[i] + " " + players.newAlias[i] + " " + players.newScore[i]);
+    }
+
+    resp.redirect("/match-submit");
+
+  });
+
 
  // -- New Player
 app.route("/new-player/submit")
