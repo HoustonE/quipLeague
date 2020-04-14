@@ -172,6 +172,7 @@ app.route("/register")
         resp.redirect("/register");
       } else {
         passport.authenticate("local")(req, resp, function() {
+          console.log("logged in? -> " + req.isAuthenticated());
           resp.redirect("/");
         });
       }
@@ -231,6 +232,7 @@ app.route("/player/:playerName")
             // alert("player not found :(");
             resp.redirect("/");
           } else {
+            console.log("logged in? -> " + req.isAuthenticated());
             resp.render("player", {playerName: foundPlayer.playerName, thisPlayer: foundPlayer, loggedIn: req.isAuthenticated()});
           }
         }
@@ -268,7 +270,7 @@ app.route("/player/:playerName")
 
           foundPlayer.sessionScores.push(newSessionScore);
           foundPlayer.save();
-          resp.render("player", {playerName: foundPlayer.playerName, thisPlayer: foundPlayer});
+          resp.render("player", {playerName: foundPlayer.playerName, thisPlayer: foundPlayer, loggedIn: req.isAuthenticated()});
         }
       }});
 
@@ -301,6 +303,7 @@ app.route("/match/:matchNumber")
     });
   });
 
+// -- Match-Submit
 app.route("/match-submit")
   .get(function(req, resp){
     // pass in top MatchID to validate that there is not one that exists
@@ -316,19 +319,68 @@ app.route("/match-submit")
     });
   })
   .post(function(req, resp){
-    if(!req.body.newMatch){
-      resp.render("match-submit");
-    }
-
-    console.log(req.body.newMatch + " - " + req.body.newMatchDate);
 
     const players = req.body.newPlayer;
 
     for(var i = 0; i < 8;  i++){
+      if(players.newName[i] !== ''){
         console.log(players.newName[i] + " " + players.newAlias[i] + " " + players.newScore[i]);
+
+        // console.log(players.newName[i].replace(/([a-z0-9])([A-Z])/g, '$1 $2'));
+        const matchPlayer = new Player(
+          {
+              playerAliases: players.newAlias[i],
+              playerName: players.newName[i],
+              sessionScores: {
+                sessionId: req.body.newMatch,
+                sessionDate: req.body.newMatchDate,
+                gameType: req.body.gameType,
+                score: players.newScore[i]
+              }
+          }
+        );
+
+        console.log(matchPlayer);
+
+        Player.findOne({playerName: matchPlayer.playerName}, function(err, foundPlayer){
+          if(err){
+            console.log(err);
+            // alert(err);
+          } else {
+            if(!foundPlayer){
+              console.log("player does not exist");
+              console.log("created -> " + matchPlayer);
+
+              matchPlayer.save();
+            } else {
+              if (foundPlayer.playerAliases.includes(matchPlayer.playerAliases[0]) === false && matchPlayer.playerAliases[0] !== "" ) {
+                 foundPlayer.playerAliases.push(matchPlayer.playerAliases[0]);
+              }
+
+              const newSessionScore = new SessionScore({
+                sessionId: req.body.newMatch,
+                sessionDate: req.body.newMatchDate,
+                gameType: req.body.gameType,
+                score: players.newScore[i]
+              });
+
+              foundPlayer.sessionScores.push({
+                sessionId: matchPlayer.sessionScores[0].sessionId,
+                sessionDate: matchPlayer.sessionScores[0].sessionDate,
+                gameType: matchPlayer.sessionScores[0].gameType,
+                score: matchPlayer.sessionScores[0].score
+              });
+
+              console.log("Player Exists -> updated to -> ");
+              console.log(foundPlayer);
+              foundPlayer.save();
+            }
+          }
+        });
+      }
     }
 
-    resp.redirect("/match-submit");
+    resp.redirect("/");
 
   });
 
@@ -367,7 +419,7 @@ app.route("/new-player/submit")
             console.log(newPlayer);
             newPlayer.playerAliases.push(newPlayerAlias);
             newPlayer.save();
-            resp.render("player", {playerName: newPlayer.playerName, thisPlayer: newPlayer});
+            resp.render("player", {playerName: newPlayer.playerName, thisPlayer: newPlayer, loggedIn: req.isAuthenticated()});
         }
       }
     });
