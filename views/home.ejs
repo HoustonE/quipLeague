@@ -22,7 +22,8 @@
         <tr>
         <th scope="row"><%= index+1%></th>
         <td><a href="player/:<%=player._id%>"><%=player._id%></a></td>
-        <td><%=player.aliases %></td>  <!--Set width limit for when aliases get too large-->
+        <% const aliasString = player.aliases; %>
+        <td><%=aliasString.join(", ")  %></td>  <!--Set width limit for when aliases get too large-->
         <td><%=player.totalScore %></td>
         </tr>
         <%}) %>

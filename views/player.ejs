@@ -2,8 +2,8 @@
 
   <div class="container">
       <h1><%=playerName%></h1>
-
-      <h3>Known Aliases: <%=thisPlayer.playerAliases %></h3> <!--Pretty up Alias -->
+      <% const aliasString = thisPlayer.playerAliases %>
+      <h3>Known Aliases: <%=aliasString.join(", "); %></h3> <!--Pretty up Alias -->
       <h3>Email: <%=thisPlayer.playerEmail%></h3>
       <br>
       <h5>Match History</h5>
@@ -14,7 +14,7 @@
             <th scope="col">Date</th>
             <th scope="col">GameType</th>
             <th scope="col">Score</th>
-            <th scope="col">Position</th>
+            <!-- <th scope="col">Position</th> -->
           </tr>
         </thead>
         <tbody>
@@ -25,7 +25,7 @@
             <td><%=tempDate.toDateString() %></td>
             <td><%=match.gameType%></td>
             <td><%=match.score %></td>  <!--Set width limit for when aliases get too large-->
-            <td><%=match.position%></td>
+            <!-- <td><%=match.position%></td> -->
             </tr>
             <%}) %>
         </tbody>

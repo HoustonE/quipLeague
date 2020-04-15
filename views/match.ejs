@@ -21,7 +21,7 @@
     <tbody>
     <% thisMatch.forEach(function(player, index){%>
         <tr>
-        <td><%=player.playerName%></td>
+        <td><a href="player/<%=player.playerName%>"><%=player.playerName%></a></td>
         <td><%=player.score %></td>  <!--Set width limit for when aliases get too large-->
         <td scope="row"><%= index+1%></td>
         </tr>

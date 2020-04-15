@@ -133,7 +133,7 @@ app.route("/")
         console.log(err);
       } else {
         // console.log(results);
-        resp.render("home", {leaderboard: results});
+        resp.render("home", {leaderboard: results, loggedIn: req.isAuthenticated()});
       }
     });
   });
@@ -141,7 +141,11 @@ app.route("/")
 // -- Login
 app.route("/login")
   .get(function(req, resp) {
-    resp.render("login");
+    if(!req.isAuthenticated()){
+      resp.render("login", {loggedIn: req.isAuthenticated()});
+    } else {
+      resp.redirect("/profile");
+    }
   })
   .post(function(req, resp) {
     const user = new User({
@@ -154,7 +158,7 @@ app.route("/login")
         console.log(err);
       } else {
         passport.authenticate("local")(req, resp, function() {
-          resp.redirect("/");
+          resp.redirect("/profile");
         });
       }
     });
@@ -163,7 +167,11 @@ app.route("/login")
 // -- Register
 app.route("/register")
   .get(function(req, resp) {
-    resp.render("register");
+    if(!req.isAuthenticated()){
+      resp.render("register", {loggedIn: req.isAuthenticated()});
+    } else {
+      resp.redirect("/");
+    }
   })
   .post(function(req, resp) {
     User.register({username: req.body.username}, req.body.password, function(err, user) {
@@ -179,6 +187,25 @@ app.route("/register")
     });
   });
 
+// -- Logout
+app.route("/logout")
+  .get(function(req, resp){
+      req.logout();
+      resp.redirect("/");
+  });
+
+// -- User/Profile
+app.route("/profile")
+  .get(function(req, resp){
+    if(req.isAuthenticated()){
+      resp.render("profile", {user: req.user, loggedIn: req.isAuthenticated()});
+    } else {
+      resp.redirect("/login");
+    }
+  });
+
+
+
 // -- GoogleAuth
 app.route("/auth/google")
   .get(
@@ -189,7 +216,7 @@ app.route("/auth/google")
 
 app.route("/auth/google/quipleague")
   .get(passport.authenticate('google', {failureRedirect: '/login'}),function(req, resp) {
-      resp.redirect('/');
+      resp.redirect("/profile");
     }
   );
 
@@ -209,7 +236,7 @@ app.route("/match-list")
       if(err){
         console.log(err);
       } else {
-          resp.render("match-list", {matches: results});
+          resp.render("match-list", {matches: results, loggedIn: req.isAuthenticated()});
       }
     });
   });
@@ -297,7 +324,7 @@ app.route("/match/:matchNumber")
           // alert("player not found :(");
           resp.redirect("/");
         } else {
-          resp.render("match", {thisMatch: results});
+          resp.render("match", {thisMatch: results, loggedIn: req.isAuthenticated()});
         }
       }
     });
@@ -306,6 +333,7 @@ app.route("/match/:matchNumber")
 // -- Match-Submit
 app.route("/match-submit")
   .get(function(req, resp){
+    if(req.isAuthenticated()){
     // pass in top MatchID to validate that there is not one that exists
     const pipeline = [{$unwind: "$sessionScores"},{$group: {_id: '$sessionScores.sessionId'}},{$sort: {_id: -1}},{$limit: 1}];
 
@@ -314,9 +342,12 @@ app.route("/match-submit")
         console.log(err);
       } else {
         console.log(results[0]);
-        resp.render("match-submit", {lastMatch: results[0]});
+        resp.render("match-submit", {lastMatch: results[0], loggedIn: req.isAuthenticated()});
       }
     });
+  } else {
+    resp.redirect("/login");
+  }
   })
   .post(function(req, resp){
 
@@ -389,7 +420,7 @@ app.route("/match-submit")
 app.route("/new-player/submit")
   .get(function (req, resp){
     if(req.isAuthenticated()){
-      resp.render("new-player");
+      resp.render("new-player", {loggedIn: req.isAuthenticated()});
     } else{
       resp.redirect("/login");
     }

@@ -20,15 +20,27 @@
         <li class="nav-item">
           <a class="nav-link" href="/match-list">Matches</a>
         </li>
+        <% if(loggedIn){ %>
         <li class="nav-item">
           <a class="nav-link" href="/new-player/submit">New Player</a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/match-submit">New Match</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/profile">My Profile</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/logout">Logout</a>
+        </li>
+        <% } else { %>
         <li class="nav-item">
           <a class="nav-link" href="/login">Login</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="/register">Register</a>
         </li>
+        <% } %>
       </ul>
     </div>
   </nav>
