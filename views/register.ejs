@@ -1,12 +1,11 @@
 <%- include('partials/header') %>
 
 <div class="container mt-5">
-  <h1>Register</h1>
 <div class="row">
-  <div class="col-sm-8">
+  <div class="col-lg-8">
     <div class="card">
       <div class="card-body">
-
+        <h2 class="card-title">New User</h2>
         <!-- Makes POST request to /register route -->
         <form action="/register" method="POST">
           <div class="form-group">
@@ -23,19 +22,21 @@
       </div>
     </div>
   </div>
+</div>
 
+<div class="row">
   <div class="col-sm-4">
     <div class="card">
       <div class="card-body">
         <a class="btn btn-block btn-social btn-google" href="/auth/google" role="button">
           <i class="fab fa-google"></i>
-          Sign In with Google
+          Register with Google
         </a>
       </div>
     </div>
   </div>
-
 </div>
+
 </div>
 
 <%- include('partials/footer') %>

@@ -3,10 +3,19 @@
   <div class="container">
       <h1><%=playerName%></h1>
       <% const aliasString = thisPlayer.playerAliases %>
-      <h3>Known Aliases: <%=aliasString.join(", "); %></h3> <!--Pretty up Alias -->
-      <h3>Email: <%=thisPlayer.playerEmail%></h3>
+      <h3>Known Aliases: <%=aliasString.join(", "); %></h3> <!--[ ] TODO: Pretty up Alias -->
+      <div class="row">
+        <h3 class="col-auto mr-auto">Email: <%=thisPlayer.playerEmail%></h3>
+        <% if(loggedIn){ %>
+        <!-- Button trigger modal -->
+        <div class="col-auto">
+          <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editModal">Edit</button>
+        </div>
+        <%}%>
+      </div>
       <br>
       <h5>Match History</h5>
+
       <table class="table table-striped">
         <thead>
           <tr>
@@ -14,7 +23,6 @@
             <th scope="col">Date</th>
             <th scope="col">GameType</th>
             <th scope="col">Score</th>
-            <!-- <th scope="col">Position</th> -->
           </tr>
         </thead>
         <tbody>
@@ -24,13 +32,11 @@
             <% var tempDate = new Date(match.sessionDate); var userTimezoneOffset = tempDate.getTimezoneOffset() * 60000; tempDate = new Date(tempDate.getTime() + userTimezoneOffset);%>
             <td><%=tempDate.toDateString() %></td>
             <td><%=match.gameType%></td>
-            <td><%=match.score %></td>  <!--Set width limit for when aliases get too large-->
-            <!-- <td><%=match.position%></td> -->
+            <td><%=match.score %></td>  <!--[ ] TODO: Set width limit for when aliases get too large-->
             </tr>
             <%}) %>
         </tbody>
       </table>
-
 
   </div>
 
@@ -71,5 +77,48 @@
     </form>
   </div>
   <%}%>
+
+  <!-- Modal -->
+  <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Edit Player</h5>
+          <!-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button> -->
+        </div>
+        <div class="modal-body">
+          <form class="" action="/edit-player/:playerName" method="post">
+            <input type="hidden" id="editPlayerId" name="editPlayerId" value="<%=thisPlayer._id%>">
+
+              <div class="col mb-3 form-group" id="entry-item">
+                <label for="editPlayerName" class="col-sm-2 .col-form-label-sm">Name: </label>
+                <input class="form-control-sm" type="text" name="editPlayerName" value="<%=playerName%>">
+              </div>
+              <div class="col mb-3 form-group" id="entry-item">
+                <label for="editPlayerEmail" class="col-sm-2 .col-form-label-sm">Email: </label>
+                <input class="form-control-sm" type="email" name="editPlayerEmail" value="<%=thisPlayer.playerEmail%>">
+              </div>
+              <div class="col mb-3 form-group" id="entry-item">
+                <!-- [ ] TODO: Either single add or long string edit with delimters  -->
+                <label for="editPlayerAlias" class="col-sm-2 .col-form-label-sm">Aliases: </label>
+                <% const aliasString2 = thisPlayer.playerAliases %>
+                <input class="form-control-sm" type="text" name="editPlayerAlias" value="<%=aliasString2.join(", "); %>">
+              </div>
+              <div class="row justify-content-end">
+                <div class="col-2 form-group" id="entry-item">
+                  <button class="btn btn-primary btn-sm" type="submit">Save</button>
+                </div>
+                <div class="col-2 form-group" id="entry-item">
+                  <button class="btn btn-outline-secondary btn-sm " data-dismiss="modal" type="reset">Cancel</button>
+                </div>
+              </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
 
 <%- include('partials/footer') %>

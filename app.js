@@ -58,7 +58,8 @@ const userSchema = new mongoose.Schema({
     email: String,
     password: String,
     googleId: String,
-    name: String
+    name: String,
+    isAdmin: Boolean
 });
 
 userSchema.plugin(passportLocalMongoose);
@@ -99,10 +100,8 @@ passport.use(new GoogleStrategy({
 // ****** League Schema ******
 
 const sessionScoreSchema = new mongoose.Schema({
-  //_id: mongoose.Schema.Types.ObjectId,
   sessionId: Number,
   sessionDate: Date,
-  //playerId: playerSchema,
   gameType: String,
   score: Number,
   position: Number
@@ -112,11 +111,11 @@ const SessionScore = new mongoose.model("SessionScore", sessionScoreSchema);
 
 
 const playerSchema = new mongoose.Schema({
-  //_id: mongoose.Schema.Types.ObjectId,
   playerName: String,
   playerAliases: [String],
   playerEmail: String,
-  sessionScores: [sessionScoreSchema]
+  sessionScores: [sessionScoreSchema],
+  linkedUser: userSchema
 });
 
 const Player = new mongoose.model("Player", playerSchema);
@@ -144,7 +143,8 @@ app.route("/login")
     if(!req.isAuthenticated()){
       resp.render("login", {loggedIn: req.isAuthenticated()});
     } else {
-      resp.redirect("/profile");
+      resp.redirect(req.session.returnTo || "/profile");
+      delete req.session.returnTo;
     }
   })
   .post(function(req, resp) {
@@ -158,7 +158,8 @@ app.route("/login")
         console.log(err);
       } else {
         passport.authenticate("local")(req, resp, function() {
-          resp.redirect("/profile");
+          resp.redirect(req.session.returnTo || "/profile");
+          delete req.session.returnTo;
         });
       }
     });
@@ -168,7 +169,7 @@ app.route("/login")
 app.route("/register")
   .get(function(req, resp) {
     if(!req.isAuthenticated()){
-      resp.render("register", {loggedIn: req.isAuthenticated()});
+      resp.render("login", {loggedIn: req.isAuthenticated()});
     } else {
       resp.redirect("/");
     }
@@ -216,7 +217,8 @@ app.route("/auth/google")
 
 app.route("/auth/google/quipleague")
   .get(passport.authenticate('google', {failureRedirect: '/login'}),function(req, resp) {
-      resp.redirect("/profile");
+    resp.redirect(req.session.returnTo || "/profile");
+    delete req.session.returnTo;
     }
   );
 
@@ -279,6 +281,7 @@ app.route("/player/:playerName")
 
     console.log(newSessionScore);
 
+    console.log(req.body.playerId);
     Player.findById(req.body.playerId, function(err, foundPlayer){
       if(err){
         console.log(err);
@@ -300,6 +303,33 @@ app.route("/player/:playerName")
           resp.render("player", {playerName: foundPlayer.playerName, thisPlayer: foundPlayer, loggedIn: req.isAuthenticated()});
         }
       }});
+
+  })
+
+
+app.route("/edit-player/:playerName")
+  .post(function(req, resp){
+
+    const aliasStr = req.body.editPlayerAlias;
+    const aliasArr = aliasStr.split(", ");
+
+    console.log(aliasArr);
+
+    Player.findByIdAndUpdate(req.body.editPlayerId, {playerName: req.body.editPlayerName, playerEmail: req.body.editPlayerEmail, playerAliases: aliasArr}, {returnOriginal: false}, function(err, result){
+      if(err){
+        console.log(err);
+        // alert(err);
+      } else {
+        if(!result){
+          console.log("player not found :(");
+          resp.redirect("/");
+        } else {
+          // console.log(result);
+          // resp.render("player", {playerName: result.playerName, thisPlayer: result, loggedIn: req.isAuthenticated()});
+          resp.redirect("/player/"+result.playerName);
+        }
+      }
+    });
 
   });
 
@@ -346,6 +376,7 @@ app.route("/match-submit")
       }
     });
   } else {
+    req.session.returnTo = req.path;
     resp.redirect("/login");
   }
   })
@@ -428,14 +459,15 @@ app.route("/new-player/submit")
   .post(function (req, resp){
     console.log(req.body.newName);
     console.log(req.body.newAlias);
-    console.log(req.body.newEmail);
+    console.log(req.user);
     const newPlayerName = req.body.newName;
     const newPlayerAlias = req.body.newAlias;
     const newPlayerEmail = req.body.newEmail;
     const newPlayer = new Player(
       {
         playerName: newPlayerName,
-        playerEmail: newPlayerEmail
+        playerEmail: newPlayerEmail,
+        linkedUser: req.user
       });
       console.log(newPlayer);
 
